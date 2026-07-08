@@ -26,7 +26,7 @@
   location.replace(prefix + clean + 'index.html' + location.search + location.hash);
 })();
 </script>
-<style id="pfe-strip-style">.planner-pfe-strip{display:flex;align-items:center;gap:10px;margin:10px 0 12px;padding:10px 11px;border:1px solid rgba(227,30,36,.28);border-radius:10px;background:linear-gradient(135deg,rgba(227,30,36,.14),rgba(255,255,255,.055));color:#fff;text-decoration:none}.planner-pfe-strip:hover{border-color:rgba(227,30,36,.6);transform:translateY(-1px)}.planner-pfe-strip i{display:grid;place-items:center;width:24px;height:24px;border-radius:7px;background:#8b342a;color:#ffe8dc;font-size:12px}.planner-pfe-strip b{display:block;font:900 10px/1.1 Inter,Arial,sans-serif;letter-spacing:.02em}.planner-pfe-strip small{display:block;margin-top:2px;color:#c8ab99;font:700 8px/1.2 Barlow,Arial,sans-serif}</style>
+<style id="pfe-strip-style">.sidebar{display:flex;flex-direction:column}.planner-pfe-footer{display:flex;align-items:center;gap:10px;margin-top:auto;padding:11px 12px;border:1px solid rgba(227,30,36,.28);border-radius:10px;background:linear-gradient(135deg,rgba(227,30,36,.14),rgba(255,255,255,.055));color:#fff;text-decoration:none}.planner-pfe-footer:hover{border-color:rgba(227,30,36,.6);transform:translateY(-1px)}.planner-pfe-footer i{display:grid;place-items:center;width:24px;height:24px;border-radius:7px;background:#8b342a;color:#ffe8dc;font-size:12px}.planner-pfe-footer b{display:block;font:900 10px/1.1 Inter,Arial,sans-serif;letter-spacing:.02em}.planner-pfe-footer small{display:block;margin-top:2px;color:#c8ab99;font:700 8px/1.2 Barlow,Arial,sans-serif}</style>
 </head>
 <body>
 <div class="loadpilot-shell">
@@ -83,6 +83,7 @@
       <section class="panel"><h2>Ladeliste</h2><div id="cargoList" class="cargo-list"></div></section>
       <section class="panel selected-panel"><h2>Ausgewählte Ladung</h2><div id="selectedInfo" class="selected">Wählen Sie eine Position aus der Ladeliste.</div></section>
     </div>
+    <a class="planner-pfe-footer" href="de.html" aria-label="Padmain Freight Exchange"><i class="fa-solid fa-arrow-left-long" aria-hidden="true"></i><span><b>Padmain Freight Exchange</b><small>Panel für Stückgut-Anfragen</small></span></a>
   </aside>
 
   <main class="workspace">
