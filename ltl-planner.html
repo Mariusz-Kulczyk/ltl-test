@@ -611,7 +611,20 @@ try{
   fbApp=initializeApp(firebaseConfig);
   fbAuth=getAuth(fbApp);
   fbDb=getFirestore(fbApp);
-  authReady=new Promise(resolve=>onAuthStateChanged(fbAuth,user=>{authUser=user;resolve(user)}));
+  authReady=new Promise(resolve=>onAuthStateChanged(fbAuth,async user=>{
+    authUser=user;
+    if(user){
+      try{localStorage.setItem('mkFirebaseAuthEmail',user.email||'');}catch(e){}
+      if(typeof setCurrentFromAuthEmail==='function')setCurrentFromAuthEmail(user.email||'');
+      if(document.querySelector('#app')){
+        try{await loadCloudData();}catch(e){}
+        if(typeof render==='function')render();
+      }
+    }else{
+      try{localStorage.removeItem('mkFirebaseAuthEmail');}catch(e){}
+    }
+    resolve(user);
+  }));
   cloudOnline=true;
 }catch(firebaseInitError){console.warn('Firebase init error',firebaseInitError);}
 const ADMIN={id:'admin',role:'admin',company:'M. KULCZYK',companyCode:'MK',name:'Mariusz Kulczyk',contact:'Mariusz Kulczyk',email:'contact@mkulczyk.pl',phone:'',login:'contact@mkulczyk.pl',accessCode:'123',language:'pl',vatEu:''};
@@ -704,10 +717,33 @@ function ensureDefaultClients(){
   state.clients.forEach(c=>{const def=defaults.clients.find(x=>x.id===c.id)||{};c.role='client';c.login=c.login||def.login||c.email||c.id;c.accessCode=c.accessCode||def.accessCode||'123';c.companyCode=c.companyCode||def.companyCode||String(c.company||'KL').slice(0,2).toUpperCase();c.email=c.email||def.email||'';c.contact=c.contact||def.contact||c.name||'';c.name=c.name||def.name||c.contact||'';c.phone=c.phone||def.phone||'';c.vatEu=c.vatEu||def.vatEu||'';c.language=c.language||def.language||'pl';});
 }
 function localSnapshot(){return {admin:state.admin,clients:state.clients,requests:state.requests,notifications:state.notifications,notifyEmail:state.notifyEmail,currency:state.currency,lang:state.lang,notifyBrowser:state.notifyBrowser}}
-function saveLocal(){try{localStorage.setItem('mkLtlModelV43FirebaseBackup',JSON.stringify(localSnapshot()));localStorage.setItem('mkLtlModelV23',JSON.stringify(localSnapshot()));}catch(e){}}
+function saveLocal(){try{localStorage.setItem('mkLtlModelV44FirebaseBackup',JSON.stringify(localSnapshot()));localStorage.setItem('mkLtlModelV23',JSON.stringify(localSnapshot()));}catch(e){}}
 function plain(obj){return JSON.parse(JSON.stringify(obj||{}));}
-function loginAlias(v){const raw=String(v||'').trim();const key=normalizeLogin(raw);return ({test:'test@demo.pl',nord:'nordcargo@demo.pl'}[key]||raw)}
+function loginAlias(v){const raw=String(v||'').trim();const key=normalizeLogin(raw);return ({test:'test@mkulczyk.pl',nord:'nord@mkulczyk.pl','nordcargo':'nord@mkulczyk.pl'}[key]||raw)}
 function isAdminEmail(email){return normalizeLogin(email)===normalizeLogin(ADMIN_EMAIL)}
+function setCurrentFromAuthEmail(email){
+  const normalized=normalizeLogin(email||'');
+  if(!normalized)return false;
+  if(isAdminEmail(normalized)){
+    state.current=state.admin;
+    state.view='loads';
+    return true;
+  }
+  let client=state.clients.find(c=>normalizeLogin(c.email)===normalized||normalizeLogin(c.login)===normalized);
+  if(!client){
+    client={id:'client_'+normalized.replace(/[^a-z0-9]+/g,'_'),role:'client',company:email||'Klient',companyCode:'KL',vatEu:'',language:state.lang||'pl',name:email||'Klient',contact:email||'',email:email||'',phone:'',login:email||'',accessCode:''};
+    state.clients=[...state.clients.filter(c=>c.email),client];
+  }
+  client.role='client';
+  state.current=client;
+  state.view='loads';
+  return true;
+}
+function syncLoggedInSession(){
+  const email=(authUser?.email)||(fbAuth?.currentUser?.email)||(()=>{try{return localStorage.getItem('mkFirebaseAuthEmail')||''}catch(e){return ''}})();
+  if(email&&!state.current)return setCurrentFromAuthEmail(email);
+  return Boolean(state.current);
+}
 function withClientEmail(r){const c=getClient(r.clientId)||{};return {...plain(r),clientEmail:r.clientEmail||c.email||''}}
 async function docsToArray(q){const snap=await getDocs(q);return snap.docs.map(d=>({id:d.id,...d.data()}));}
 async function loadCloudData(){
@@ -744,7 +780,7 @@ async function loadCloudData(){
     state.requests.forEach(normalizeRequest);
     saveLocal();
     return true;
-  }catch(err){console.warn('Firebase load error',err);toast('Nie udało się pobrać danych z Firebase. Pokazuję kopię lokalną.');return false;}
+  }catch(err){console.warn('Firebase load error',err);setCurrentFromAuthEmail(fbAuth?.currentUser?.email||'');toast('Nie udało się pobrać danych z Firebase. Pokazuję kopię lokalną.');return false;}
 }
 async function cloudSaveNow(){
   if(!cloudOnline||!fbAuth?.currentUser||!fbDb||cloudBusy)return;
@@ -773,10 +809,12 @@ async function cloudSaveNow(){
 }
 function store(){saveLocal();if(cloudSaveTimer)clearTimeout(cloudSaveTimer);cloudSaveTimer=setTimeout(cloudSaveNow,250);}
 async function load(){
-  try{const raw=localStorage.getItem('mkLtlModelV43FirebaseBackup')||localStorage.getItem('mkLtlModelV23')||localStorage.getItem('mkLtlModelV17')||localStorage.getItem('mkLtlModelV16')||localStorage.getItem('mkLtlModelV15');const x=JSON.parse(raw);if(x){state.admin=x.admin||state.admin;state.clients=Array.isArray(x.clients)&&x.clients.length?x.clients:state.clients;state.requests=Array.isArray(x.requests)?x.requests:[];state.notifications=Array.isArray(x.notifications)?x.notifications:[];state.notifyEmail=x.notifyEmail||state.notifyEmail;state.currency=x.currency||state.currency;state.lang=x.lang||state.lang;state.notifyBrowser=Boolean(x.notifyBrowser);state.requests.forEach(normalizeRequest)}}catch(e){}
+  try{const raw=localStorage.getItem('mkLtlModelV44FirebaseBackup')||localStorage.getItem('mkLtlModelV23')||localStorage.getItem('mkLtlModelV17')||localStorage.getItem('mkLtlModelV16')||localStorage.getItem('mkLtlModelV15');const x=JSON.parse(raw);if(x){state.admin=x.admin||state.admin;state.clients=Array.isArray(x.clients)&&x.clients.length?x.clients:state.clients;state.requests=Array.isArray(x.requests)?x.requests:[];state.notifications=Array.isArray(x.notifications)?x.notifications:[];state.notifyEmail=x.notifyEmail||state.notifyEmail;state.currency=x.currency||state.currency;state.lang=x.lang||state.lang;state.notifyBrowser=Boolean(x.notifyBrowser);state.requests.forEach(normalizeRequest)}}catch(e){}
   try{const urlLang=new URLSearchParams(location.search).get('lang');if(['pl','en','de'].includes(urlLang))state.lang=urlLang;}catch(e){}
   ensureDefaultClients();state.notifyEmail=state.notifyEmail||defaults.notifyEmail;
-  if(authReady){await authReady;if(authUser)await loadCloudData();}
+  const savedEmail=(()=>{try{return localStorage.getItem('mkFirebaseAuthEmail')||''}catch(e){return ''}})();
+  if(savedEmail)setCurrentFromAuthEmail(savedEmail);
+  if(authReady){await authReady;if(authUser){setCurrentFromAuthEmail(authUser.email||'');await loadCloudData();}}
 }
 function localToday(){const d=new Date();const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`}
 function postalOnly(v){
@@ -817,19 +855,23 @@ async function loginWithCode(){
   if(!loginRaw||!code){toast('Wpisz login i kod dostępu.');return}
   try{
     if(cloudOnline&&fbAuth){
-      await signInWithEmailAndPassword(fbAuth,loginAlias(loginRaw),code);
+      const cred=await signInWithEmailAndPassword(fbAuth,loginAlias(loginRaw),code);
+      const signedEmail=cred?.user?.email||loginAlias(loginRaw);
+      try{localStorage.setItem('mkFirebaseAuthEmail',signedEmail);}catch(e){}
+      setCurrentFromAuthEmail(signedEmail);
       await loadCloudData();
+      setCurrentFromAuthEmail(signedEmail);
       document.querySelector('#loginModal')?.remove();
       render();toast('Zalogowano.');return;
     }
   }catch(err){console.warn('Firebase login error',err);toast('Nieprawidłowy login albo kod dostępu w Firebase.');return}
   const login=normalizeLogin(loginRaw);
-  if(accountMatches(state.admin,login)&&code===state.admin.accessCode){state.current=state.admin;state.view='loads';render();return}
+  if(accountMatches(state.admin,login)&&code===state.admin.accessCode){state.current=state.admin;state.view='loads';try{localStorage.setItem('mkFirebaseAuthEmail',state.admin.email||state.admin.login||'')}catch(e){}render();return}
   const client=state.clients.find(c=>accountMatches(c,login)&&String(c.accessCode||'123')===code);
-  if(client){state.current=client;state.view='loads';render();return}
+  if(client){state.current=client;state.view='loads';try{localStorage.setItem('mkFirebaseAuthEmail',client.email||client.login||'')}catch(e){}render();return}
   toast('Nieprawidłowy login albo kod dostępu.');
 }
-async function logout(){try{if(cloudOnline&&fbAuth)await signOut(fbAuth);}catch(e){}authUser=null;state.current=null;render()}
+async function logout(){try{if(cloudOnline&&fbAuth)await signOut(fbAuth);}catch(e){}try{localStorage.removeItem('mkFirebaseAuthEmail')}catch(e){}authUser=null;state.current=null;render()}
 function sidebarBrand(){return `<div class="brand"><div class="mark">MK</div><div>M. KULCZYK<small>KURSY</small></div></div><div class="lang-public-label">Wersja językowa</div>${langButtons()}`}
 function sidebarBottom(logged=true){return `<div class="sidebar-tool" aria-label="Load Planner — wkrótce"><span class="sidebar-tool-icon">↗</span><div><b>Load Planner</b><small>Drugie narzędzie · wkrótce</small></div></div><div class="motohouse-badge"><b>Obecnie w Motohouse</b><span>Rozwijamy narzędzia operacyjne w standardzie pracy flotowej i spedycyjnej.</span></div>${logged?`<button data-action="logout" class="btn dark logout">Wyloguj</button>`:''}`}
 function layout(inner){
@@ -1030,9 +1072,9 @@ function renderSettings(){
   const notes=state.notifications.length?state.notifications.map(n=>`<div class="notification-item ${n.read?'read':''}"><div><b>${esc(n.kind)} ${n.code?`· ${esc(n.code)}`:''}</b><span>${esc(formatRegisteredAt(n.createdAt))} · ${esc(n.client||'')} ${n.details?`· ${esc(n.details)}`:''}</span></div></div>`).join(''):`<div class="notification-empty">Brak powiadomień w tej przeglądarce.</div>`;
   return layout(`<div class="head"><div><h1>Ustawienia</h1><p>Adres alertów administratora może być inny niż adres logowania.</p></div></div><section class="card"><h2 class="section-title">Powiadomienia i domyślna waluta</h2><form id="settingsForm" class="form-grid"><div class="field full"><label>Nadawca systemu</label><input value="powiadomienia@mkulczyk.pl" readonly></div><div class="field"><label>E-mail do powiadomień administratora</label><input id="notifyEmail" type="email" value="${esc(state.notifyEmail)}"></div><div class="field"><label>Domyślna waluta budżetu</label><select id="defaultCurrency">${currencies.map(x=>`<option ${state.currency===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="field full"><label class="settings-switch"><input id="notifyBrowser" type="checkbox" ${state.notifyBrowser?'checked':''}> Powiadomienia systemowe w przeglądarce, gdy przeglądarka pozwoli</label></div><div class="field full"><div class="actions"><button class="btn red" type="submit">Zapisz ustawienia</button><button class="btn" type="button" data-enable-browser-notify>Włącz powiadomienia przeglądarki</button><button class="btn" type="button" data-test-mail>Próba powiadomienia e-mail</button></div></div></form><p class="settings-note"><b>Firebase:</b> zapytania, statusy, archiwum, klienci i powiadomienia zapisują się w Firestore. E-mail zewnętrzny dalej otwiera program pocztowy przez mailto.</p></section><section class="card" style="margin-top:12px"><h2 class="section-title">Centrum powiadomień ${unread?`<span class="notification-badge">${unread}</span>`:''}</h2><div class="notification-list">${notes}</div><div class="modal-actions" style="padding:0 14px 14px"><button class="btn" data-mark-notifications-read>Oznacz jako przeczytane</button><button class="btn danger" data-clear-notifications>Wyczyść</button></div></section>`);
 }
-function render(){state.requests.forEach(normalizeRequest);const app=$('#app');if(!state.current){app.innerHTML=renderPublic();return}if(state.view==='profile'){app.innerHTML=renderProfile();return}app.innerHTML=state.current.role==='client'?renderClient():state.view==='clients'?renderClients():state.view==='settings'?renderSettings():renderAdmin()}
+function render(){state.requests.forEach(normalizeRequest);syncLoggedInSession();const app=$('#app');if(!state.current){app.innerHTML=renderPublic();return}if(state.view==='profile'){app.innerHTML=renderProfile();return}app.innerHTML=state.current.role==='client'?renderClient():state.view==='clients'?renderClients():state.view==='settings'?renderSettings():renderAdmin()}
 function nextCode(c){const nums=state.requests.filter(r=>r.clientId===c.id).map(r=>parseInt((r.code||'').split('-')[1],10)||0);return `${c.companyCode}-${String(Math.max(0,...nums)+1).padStart(3,'0')}`}
-function addRequest(){if(!state.current||state.current.role!=='client'){loginModal();return}const c=state.current;const r={id:'r'+Date.now(),createdAt:new Date().toISOString(),clientId:c.id,code:nextCode(c),editing:false,isNewDraft:true,status:'draft',submitted:false,loads:[],stops:[],unloads:[],ldm:'',notes:'',clientNote:'',weight:'',access:'',requirements:[],tempMin:'',tempMax:'',budget:'',currency:state.currency,budgetProposalPending:false,clientProposal:'',clientProposalCurrency:state.currency,clientEmail:c.email||''};state.requests.unshift(r);store();render();openRequestWizard(r.id)}
+function addRequest(){syncLoggedInSession();if(!state.current||state.current.role!=='client'){loginModal();return}const c=state.current;const r={id:'r'+Date.now(),createdAt:new Date().toISOString(),clientId:c.id,code:nextCode(c),editing:false,isNewDraft:true,status:'draft',submitted:false,loads:[],stops:[],unloads:[],ldm:'',notes:'',clientNote:'',weight:'',access:'',requirements:[],tempMin:'',tempMax:'',budget:'',currency:state.currency,budgetProposalPending:false,clientProposal:'',clientProposalCurrency:state.currency,clientEmail:c.email||''};state.requests.unshift(r);store();render();openRequestWizard(r.id)}
 function draftFromRow(id){const row=document.querySelector(`[data-edit-row="${id}"]`);const r=state.requests.find(x=>x.id===id);if(!row||!r)return;r.ldm=row.querySelector('[name="ldm"]')?.value||'';r.notes=row.querySelector('[name="notes"]')?.value||'';r.clientNote=row.querySelector('[name="clientNote"]')?.value||'';r.weight=row.querySelector('[name="weight"]')?.value||'';r.access=row.querySelector('[name="access"]')?.value||'';r.budget=row.querySelector('[name="budget"]')?.value.trim()||'';r.currency=row.querySelector('[name="currency"]')?.value||state.currency;store()}
 function pointStartKey(p){const d=dateForStart(p);return d?`${d}T${p.timeStart||'00:00'}`:''}
 function pointEndKey(p){const d=dateForEnd(p);return d?`${d}T${p.timeEnd||'23:59'}`:''}
