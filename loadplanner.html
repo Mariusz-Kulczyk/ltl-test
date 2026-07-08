@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Load Planner 3D — planowanie przestrzeni ładunkowej i przygotowanie zapytania transportowego." />
+  <title>Load Planner 3D | M.KULCZYK</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="load_planner.css?v=v19" />
+  <link rel="stylesheet" href="nav-unified.css?v=77">
+
+<link rel="stylesheet" href="site-overrides-v77.css?v=77">
+  <link rel="stylesheet" href="tool-rail-v96.css?v=96">
+<link rel="stylesheet" href="site-mobile.css?v=107">
+<script>
+(function () {
+  if (location.protocol === 'file:') return;
+  var file = location.pathname.split('index.html').pop();
+  if (!file || !/\.html$/i.test(file)) return;
+  if (/^(index|404)\.html$/i.test(file)) return;
+  var clean = file.replace(/\.html$/i, '');
+  var prefix = location.pathname.slice(0, -file.length);
+  location.replace(prefix + clean + 'index.html' + location.search + location.hash);
+})();
+</script>
+<style id="pfe-strip-style">.planner-pfe-strip{display:flex;align-items:center;gap:10px;margin:10px 0 12px;padding:10px 11px;border:1px solid rgba(227,30,36,.28);border-radius:10px;background:linear-gradient(135deg,rgba(227,30,36,.14),rgba(255,255,255,.055));color:#fff;text-decoration:none}.planner-pfe-strip:hover{border-color:rgba(227,30,36,.6);transform:translateY(-1px)}.planner-pfe-strip i{display:grid;place-items:center;width:24px;height:24px;border-radius:7px;background:#8b342a;color:#ffe8dc;font-size:12px}.planner-pfe-strip b{display:block;font:900 10px/1.1 Inter,Arial,sans-serif;letter-spacing:.02em}.planner-pfe-strip small{display:block;margin-top:2px;color:#c8ab99;font:700 8px/1.2 Barlow,Arial,sans-serif}</style>
+</head>
+<body>
+<div class="loadpilot-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">LP</div>
+      <div><h1>LoadPlanner 3D</h1><p>Planowanie przestrzeni ładunkowej</p></div>
+      <div class="planner-brand-actions"><a class="back-link" href="home.html#narzedzia" aria-label="Wróć do strony głównej"><i class="fa-solid fa-arrow-left"></i></a></div>
+    </div>
+
+    <div class="planner-lang-switch" aria-label="Language selector"><span>Język / Language</span><a href="loadplanner.html" class="is-current" aria-current="page">PL</a><a href="loadplanner-en.html" class="">EN</a><a href="loadplanner-de.html" class="">DE</a></div>
+    <a class="planner-pfe-strip" href="pl.html" aria-label="Padmain Freight Exchange (PFE)"><i class="fa-solid fa-arrow-left-long" aria-hidden="true"></i><span><b>Padmain Freight Exchange (PFE)</b><small>Panel zapytań drobnicowych</small></span></a>
+
+    <div class="planner-mode-tabs planner-mode-tabs--icon-only" role="tablist" aria-label="Planner modes">
+      <button class="planner-mode-tab is-active" type="button" role="tab" aria-selected="true" data-planner-mode="manual" aria-label="Ręczne ustawianie" title="Ręczne ustawianie"><i class="fa-solid fa-hand-pointer" aria-hidden="true"></i><span class="sr-only">Ręczne ustawianie</span></button>
+      <button class="planner-mode-tab" type="button" role="tab" aria-selected="false" data-planner-mode="ai" aria-label="Zaplanuj przez AI" title="Zaplanuj przez AI"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i><span class="sr-only">Zaplanuj przez AI</span></button>
+      <button class="planner-mode-tab" type="button" role="tab" aria-selected="false" data-planner-mode="list" aria-label="Lista ładunków" title="Lista ładunków"><i class="fa-solid fa-list" aria-hidden="true"></i><span class="sr-only">Lista ładunków</span></button>
+    </div>
+
+    <section class="panel planner-space-panel">
+      <h2>Przestrzeń ładunkowa</h2>
+      <div class="grid3"><label>Dł. cm<input id="spaceLength" type="number" value="1360"></label><label>Szer. cm<input id="spaceWidth" type="number" value="245"></label><label>Wys. cm<input id="spaceHeight" type="number" value="270"></label></div>
+      <div class="grid2"><label>Max kg<input id="spaceWeight" type="number" value="24000"></label><button id="applySpace" type="button">Zastosuj</button></div>
+      <div class="grid2"><button id="presetTrailer" class="secondary" type="button">Naczepa 13.6</button><button id="presetVan8" class="secondary" type="button">Van 8 EP</button></div>
+    </section>
+
+    <div class="planner-mode-pane is-active" data-planner-pane="manual">
+      <section class="panel">
+        <h2>Dodaj ładunek</h2>
+        <div class="name-picker"><label>Nazwa<input id="cargoName" value="Europaleta"></label><label>Typ<select id="cargoPreset"></select></label></div>
+        <div class="grid3"><label>Dł. cm<input id="cargoLength" type="number" value="120"></label><label>Szer. cm<input id="cargoWidth" type="number" value="80"></label><label>Wys. cm<input id="cargoHeight" type="number" value="150"></label></div>
+        <div class="grid3"><label>Kg<input id="cargoWeight" type="number" value="300"></label><label>Ilość<input id="cargoQty" type="number" value="1" min="1"></label><label>Kolor<input id="cargoColor" type="color" value="#e31e24"></label></div>
+        <div class="grid2"><label class="checkline"><input id="cargoStackable" type="checkbox"> Piętrowanie</label><label>Max warstw<input id="cargoMaxStack" type="number" value="2" min="1" max="10"></label></div>
+        <div class="grid2"><button id="addCargo" type="button">Dodaj</button><button id="autoPack" class="secondary" type="button">Auto ułóż</button></div>
+        <div class="grid2 action-row"><button id="loadProject" class="secondary" type="button">Wczytaj ładunek</button><button id="saveProject" class="secondary" type="button">Zapisz lokalnie</button></div>
+        <div id="savedLoadsPanel" class="saved-loads-panel"></div><button id="clearProject" class="danger wide-btn" type="button">Wyczyść</button>
+      </section>
+    </div>
+
+    <div class="planner-mode-pane" data-planner-pane="ai">
+      <section class="panel ai-panel">
+        <h2>Zaplanuj przez AI</h2>
+        <label>Klucz Gemini API<input id="geminiApiKey" type="password" autocomplete="off" placeholder="Wklej własny klucz Gemini API"></label>
+        <div class="api-key-help"><i class="fa-solid fa-key"></i><span>Klucz pozostaje tylko w tej przeglądarce.</span><button id="geminiHelp" class="gemini-help-trigger" type="button">Jak utworzyć klucz Gemini? <i class="fa-solid fa-arrow-up-right-from-square"></i></button></div>
+        <label class="checkline remember-key"><input id="rememberGeminiKey" type="checkbox"> Zapamiętaj na czas sesji</label>
+        <label>Tekst do analizy<textarea id="aiInput" rows="8"></textarea></label>
+        <label class="checkline"><input id="aiReplace" type="checkbox" checked> Zastąp aktualne ładunki</label>
+        <button id="analyzeAi" type="button"><span class="btn-label">Zaplanuj przez AI</span><span class="btn-spinner" aria-hidden="true"></span></button>
+        <div class="ai-activity" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div id="aiStatus" class="ai-status">Gotowe do planowania.</div>
+      </section>
+    </div>
+
+    <div class="planner-mode-pane" data-planner-pane="list">
+      <section class="panel"><h2>Lista ładunków</h2><div id="cargoList" class="cargo-list"></div></section>
+      <section class="panel selected-panel"><h2>Wybrany ładunek</h2><div id="selectedInfo" class="selected">Wybierz pozycję z listy ładunków.</div></section>
+    </div>
+  </aside>
+
+  <main class="workspace">
+    <div class="planner-stage" aria-label="3D load planner">
+      <div class="toolbar"><button data-view="iso" type="button">ISO</button><button data-view="top" type="button">Góra</button><button data-view="side" type="button">Bok</button><span class="hint">Mysz: obrót kamery · Shift+przeciągnij: przesunięcie · kółko: zoom · klik ładunek: wybór/przeciąganie · prawy klik: menu · Q/E: obrót · WASD/strzałki: przesuwanie · Delete: usuń</span></div>
+      <canvas id="glCanvas"></canvas><div id="engineStatus" class="engine-status">WebGL…</div>
+      <div id="cargoContextMenu" class="context-menu" role="menu" aria-hidden="true"><button data-context-action="rotate" role="menuitem" type="button">↻ Obróć 90°</button><button data-context-action="select" role="menuitem" type="button">◎ Zaznacz</button><button data-context-action="delete" role="menuitem" class="danger" type="button">✕ Usuń</button></div>
+      <button id="sendInquiry" class="stage-inquiry-button" type="button"><i class="fa-solid fa-paper-plane"></i><span>Wyślij zapytanie</span></button><div id="inquiryStatus" class="stage-inquiry-status" aria-live="polite"></div>
+    </div>
+    <section class="workspace-stats-strip" aria-label="Statystyki planu">
+      <div class="workspace-stats-title"><i class="fa-solid fa-chart-simple" aria-hidden="true"></i><span>Statystyki planu</span></div>
+      <div id="stats" class="stats stats-horizontal"></div>
+    </section>
+  </main>
+</div>
+<div class="gemini-modal" id="geminiModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="geminiModalTitle"><div class="gemini-modal-backdrop" data-gemini-close></div><div class="gemini-modal-card" role="document"><button class="gemini-modal-close" type="button" aria-label="Zamknij instrukcję" data-gemini-close>&times;</button><span class="gemini-modal-kicker">Gemini API</span><h2 id="geminiModalTitle">Jak utworzyć własny klucz?</h2><ol><li>Otwórz Google AI Studio.</li><li>Zaloguj się na konto Google.</li><li>Wybierz „Create API key”, a następnie utwórz klucz.</li><li>Skopiuj klucz i wklej go w pole w Load Plannerze.</li></ol><p>Nie publikuj klucza w dokumentach ani wiadomościach. W tej wersji planera klucz pozostaje po stronie Twojej przeglądarki.</p><a class="gemini-modal-action" href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Otwórz Google AI Studio <i class="fa-solid fa-arrow-up-right-from-square"></i></a></div></div>
+<script src="load_planner.js?v=v20"></script>
+
+<style id="v67-footer-certificates">
+/* v67/v68 — unified footer partner area with only the MotoHouse card on every page. */
+footer#kontakt .f-partner{display:flex!important;align-items:stretch!important;min-width:0!important;}
+footer#kontakt .footer-motohouse-link{border-left:0!important;min-height:104px!important;padding:16px 18px!important;justify-items:center!important;align-content:center!important;width:100%!important;}
+</style>
+
+<script id="v67-footer-certificates-script">
+(function(){
+  var footer = document.querySelector('footer#kontakt');
+  if(!footer) return;
+  var holder = footer.querySelector('.f-partner');
+  if(!holder) return;
+  var page = (window.location.pathname.split('index.html').pop() || '').toLowerCase();
+  var lang = page.indexOf('de') === 0 ? 'de' : (page.indexOf('en') === 0 ? 'en' : 'pl');
+  var copyMap = {
+    pl: { working: 'Obecnie w:', aria: 'Obecnie w MotoHouse' },
+    en: { working: 'Currently at:', aria: 'Currently at MotoHouse' },
+    de: { working: 'Derzeit bei:', aria: 'Derzeit bei MotoHouse' }
+  };
+  var t = copyMap[lang] || copyMap.pl;
+  holder.innerHTML = '' +
+    '<a class="footer-motohouse-link footer-motohouse-visual" href="https://motohouse-tsl.com" target="_blank" rel="noopener noreferrer" aria-label="' + t.aria + '">' +
+      '<span class="footer-motohouse-copy"><strong>' + t.working + '</strong></span>' +
+      '<img class="footer-motohouse-logo" src="motohouse-logo-2.svg" alt="MotoHouse">' +
+    '</a>';
+}());
+</script>
+
+
+<script id="v77-nav-section-tone">
+(function () {
+  var header = document.querySelector('.main-header.mk-nav');
+  if (!header) return;
+  var darkSelector = '.consult-hero, .services, .cta, .article-index-hero, .hero-signal-strip, .fleet-dark, .tools-section, footer#kontakt';
+  var ticking = false;
+  function updateNavTone() {
+    var y = Math.min(window.innerHeight - 2, Math.round(header.getBoundingClientRect().bottom + 5));
+    var node = document.elementFromPoint(Math.round(window.innerWidth / 2), y);
+    var isDark = !!(node && node.closest && node.closest(darkSelector));
+    header.classList.toggle('nav-state-dark', isDark);
+    header.classList.toggle('nav-state-light', !isDark);
+    header.classList.toggle('nav-compact', window.scrollY > 14);
+    ticking = false;
+  }
+  function requestUpdate() {
+    if (!ticking) { ticking = true; window.requestAnimationFrame(updateNavTone); }
+  }
+  window.addEventListener('scroll', requestUpdate, { passive:true });
+  window.addEventListener('resize', requestUpdate);
+  requestUpdate();
+}());
+</script>
+
+<script src="site-mobile.js?v=107"></script>
+</body></html>
