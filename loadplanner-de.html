@@ -15,18 +15,7 @@
 <link rel="stylesheet" href="site-overrides-v77.css?v=77">
   <link rel="stylesheet" href="tool-rail-v96.css?v=96">
 <link rel="stylesheet" href="site-mobile.css?v=107">
-<script>
-(function () {
-  if (location.protocol === 'file:') return;
-  var file = location.pathname.split('index.html').pop();
-  if (!file || !/\.html$/i.test(file)) return;
-  if (/^(index|404)\.html$/i.test(file)) return;
-  var clean = file.replace(/\.html$/i, '');
-  var prefix = location.pathname.slice(0, -file.length);
-  location.replace(prefix + clean + 'index.html' + location.search + location.hash);
-})();
-</script>
-<style id="pfe-strip-style">.sidebar{display:flex;flex-direction:column}.planner-pfe-footer{display:flex;align-items:center;gap:10px;margin-top:auto;padding:11px 12px;border:1px solid rgba(227,30,36,.28);border-radius:10px;background:linear-gradient(135deg,rgba(227,30,36,.14),rgba(255,255,255,.055));color:#fff;text-decoration:none}.planner-pfe-footer:hover{border-color:rgba(227,30,36,.6);transform:translateY(-1px)}.planner-pfe-footer i{display:grid;place-items:center;width:24px;height:24px;border-radius:7px;background:#8b342a;color:#ffe8dc;font-size:12px}.planner-pfe-footer b{display:block;font:900 10px/1.1 Inter,Arial,sans-serif;letter-spacing:.02em}.planner-pfe-footer small{display:block;margin-top:2px;color:#c8ab99;font:700 8px/1.2 Barlow,Arial,sans-serif}</style>
+<style id="pfe-strip-style">.sidebar{position:relative!important;padding-bottom:104px!important}.planner-pfe-footer{position:fixed;left:14px;bottom:18px;z-index:9999;display:flex;align-items:center;gap:10px;width:min(292px,calc(100vw - 28px));padding:11px 12px;border:1px solid rgba(227,30,36,.38);border-radius:10px;background:linear-gradient(135deg,rgba(227,30,36,.24),rgba(34,22,18,.92));color:#fff;text-decoration:none;box-shadow:0 14px 32px rgba(0,0,0,.24);backdrop-filter:blur(6px)}.planner-pfe-footer:hover{border-color:rgba(227,30,36,.75);transform:translateY(-1px)}.planner-pfe-footer i{display:grid;place-items:center;width:24px;height:24px;border-radius:7px;background:#8b342a;color:#ffe8dc;font-size:12px}.planner-pfe-footer b{display:block;font:900 10px/1.1 Inter,Arial,sans-serif;letter-spacing:.02em}.planner-pfe-footer small{display:block;margin-top:2px;color:#e2c6b5;font:700 8px/1.2 Barlow,Arial,sans-serif}@media(max-width:800px){.planner-pfe-footer{position:static;width:auto;margin:12px}}</style>
 </head>
 <body>
 <div class="loadpilot-shell">
@@ -34,11 +23,10 @@
     <div class="brand">
       <div class="logo">LP</div>
       <div><h1>LoadPlanner 3D</h1><p>Laderaumplanung</p></div>
-      <div class="planner-brand-actions"><a class="back-link" href="home-de.html#narzedzia" aria-label="Zurück zur Startseite"><i class="fa-solid fa-arrow-left"></i></a></div>
+      <div class="planner-brand-actions"><a class="back-link" href="de.html" aria-label="Zurück zur Startseite"><i class="fa-solid fa-arrow-left"></i></a></div>
     </div>
 
     <div class="planner-lang-switch" aria-label="Language selector"><span>Język / Language</span><a href="loadplanner.html" class="">PL</a><a href="loadplanner-en.html" class="">EN</a><a href="loadplanner-de.html" class="is-current" aria-current="page">DE</a></div>
-    <a class="planner-pfe-strip" href="de.html" aria-label="Padmain Freight Exchange (PFE)"><i class="fa-solid fa-arrow-left-long" aria-hidden="true"></i><span><b>Padmain Freight Exchange (PFE)</b><small>Panel für Stückgut-Anfragen</small></span></a>
 
     <div class="planner-mode-tabs planner-mode-tabs--icon-only" role="tablist" aria-label="Planner modes">
       <button class="planner-mode-tab is-active" type="button" role="tab" aria-selected="true" data-planner-mode="manual" aria-label="Manuelle Eingabe" title="Manuelle Eingabe"><i class="fa-solid fa-hand-pointer" aria-hidden="true"></i><span class="sr-only">Manuelle Eingabe</span></button>
