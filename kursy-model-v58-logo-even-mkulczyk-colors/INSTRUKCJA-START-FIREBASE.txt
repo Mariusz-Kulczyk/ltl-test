@@ -1,0 +1,36 @@
+START / AKTUALIZACJA STRONY
+
+1. Rozpakuj ZIP.
+2. Na GitHub w repozytorium wrzuć pliki luzem do głównego katalogu:
+   index.html, pl.html, en.html, de.html, ltl-planner.html oraz pliki instrukcji.
+3. Kliknij Commit changes.
+4. Strona działa pod GitHub Pages.
+
+LOGOWANIE
+
+Admin loguje się kontem dodanym w Firebase Authentication:
+contact@mkulczyk.pl + hasło ustawione w Firebase.
+
+Klient NIE rejestruje się sam.
+Klient prosi o dostęp przez contact@mkulczyk.pl.
+Ty jako admin:
+1. Tworzysz użytkownika w Firebase > Authentication > Users > Add user.
+2. Wchodzisz na stronie jako admin > Klienci i konta.
+3. Dodajesz/edytujesz profil klienta z tym samym e-mailem.
+
+JĘZYKI
+
+pl.html, en.html i de.html otwierają ten sam panel oraz tę samą bazę Firestore.
+Różni się tylko język interfejsu. Zapytania nie są dzielone na osobne giełdy.
+Admin widzi wszystkie zapytania razem.
+
+POWIADOMIENIA
+
+W tej wersji powiadomienia są zapisywane w Firestore w kolekcji notifications dla contact@mkulczyk.pl.
+Admin widzi je w Ustawieniach / Centrum powiadomień.
+Powiadomienia przeglądarki działają, gdy admin ma otwartą stronę i pozwoli przeglądarce na powiadomienia.
+Automatyczny e-mail przy zamkniętej stronie wymaga później Firebase Trigger Email albo Cloud Functions.
+
+WAŻNE
+
+Jeżeli po wrzuceniu plików coś się nie odświeża, odśwież stronę przez Ctrl+F5 albo poczekaj chwilę na GitHub Pages.
