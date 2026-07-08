@@ -1348,6 +1348,42 @@ body{
   margin-top:-2px!important;
 }
 
+
+
+/* V73 — przewijany popup formularza zapytania */
+.request-modal{
+  align-items:flex-start!important;
+  justify-content:center!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  padding:clamp(10px,2vh,24px)!important;
+  overscroll-behavior:contain!important;
+}
+.request-modal .modal-card,
+.request-modal .wizard-card{
+  max-height:calc(100dvh - 28px)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  margin:0 auto!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+.request-modal .wizard-card{
+  scrollbar-gutter:stable!important;
+}
+.request-modal .wizard-footer{
+  position:sticky!important;
+  bottom:0!important;
+  z-index:12!important;
+  box-shadow:0 -10px 22px rgba(15,23,42,.08)!important;
+}
+@media(max-height:760px){
+  .request-modal .modal-card,
+  .request-modal .wizard-card{
+    max-height:calc(100dvh - 16px)!important;
+  }
+  .request-modal{padding:8px!important;}
+}
+
 </style>
 </head>
 <body>
