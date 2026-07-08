@@ -1,0 +1,53 @@
+WKLEJ TO W FIREBASE → Firestore Database → Rules → Publish
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+    function isAdmin() {
+      return signedIn() && request.auth.token.email == "contact@mkulczyk.pl";
+    }
+
+    match /admin/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /settings/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /clients/{clientId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.email == request.auth.token.email);
+      allow create: if isAdmin() || (signedIn() && request.resource.data.email == request.auth.token.email);
+      allow update: if isAdmin() || (
+        signedIn() &&
+        resource.data.email == request.auth.token.email &&
+        request.resource.data.email == resource.data.email
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /requests/{requestId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.clientEmail == request.auth.token.email);
+      allow create: if isAdmin() || (signedIn() && request.resource.data.clientEmail == request.auth.token.email);
+      allow update: if isAdmin() || (
+        signedIn() &&
+        resource.data.clientEmail == request.auth.token.email &&
+        request.resource.data.clientEmail == resource.data.clientEmail
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /notifications/{notificationId} {
+      allow read, delete: if isAdmin();
+      allow create: if isAdmin() || (signedIn() && request.resource.data.clientEmail == request.auth.token.email);
+      allow update: if isAdmin() || (
+        signedIn() &&
+        resource.data.clientEmail == request.auth.token.email &&
+        request.resource.data.clientEmail == resource.data.clientEmail
+      );
+    }
+  }
+}
