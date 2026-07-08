@@ -97,7 +97,7 @@ body{font-size:13px}
 .route-line{overflow:visible;text-overflow:clip;white-space:nowrap}
 .data{width:max-content;min-width:0;max-width:none}
 .data-lines{white-space:nowrap}
-/* Jeden zapis trasy mieści pełne: PL41-407 | 07.07–08.07 | 15:58–14:55 */
+/* Jeden zapis trasy mieści pełne: DE40472 | 07.07–08.07 | 15:58–14:55 */
 tr:not([data-edit-row]) .missing-strong,
 tr:not([data-edit-row]) .missing-soft{border-color:#ccd7e2!important;background:#fff!important;color:inherit!important}
 tr:not([data-edit-row]) .btn.missing-strong{border-color:#cdd7e1!important;background:#fff!important;color:#263544!important}
@@ -1295,6 +1295,33 @@ body{
   background:rgba(255,255,255,.22)!important;
 }
 
+
+
+/* V71 — drobne poprawki UX: większe logo, statusy, formularz, FAQ */
+.sidebar-logo-box{width:46px!important;height:46px!important;flex:0 0 46px!important;border-radius:11px!important;}
+.sidebar-mini-logo{width:40px!important;height:40px!important;}
+.sidebar-top-brand{padding:12px!important;gap:12px!important;}
+.sidebar-top-brand-copy strong{font-size:13px!important;}
+.sidebar-top-brand-copy small{font-size:9px!important;}
+.sidebar-tool small{display:none!important;}
+.sidebar-barometer{margin:0 4px 12px!important;}
+.status-tag[title]{cursor:help;}
+.status-tag.finalized{background:#dcfce7!important;color:#166534!important;}
+.row-finalized{--row-tint:#f0fdf4;--row-accent:#16a34a;}
+.action-cell .actions:has(.btn.danger.small:only-child){justify-content:center;}
+.request-modal{background:rgba(15,23,42,.42)!important;backdrop-filter:blur(2px);}
+.request-modal .wizard-card{width:min(100%,1040px)!important;max-height:90vh!important;border:1px solid rgba(255,255,255,.26)!important;box-shadow:0 26px 80px rgba(15,23,42,.32)!important;}
+.wizard-title{background:linear-gradient(135deg,#211f1d,#151412)!important;border-bottom:3px solid #b3131b!important;}
+.wizard-range-block.no-title{margin-top:10px;}
+.wizard-range-block.no-title>span{display:none!important;}
+.help-tip{display:inline-grid;place-items:center;width:17px;height:17px;margin-left:5px;border-radius:50%;background:#eef2ff;color:#4f46e5;border:1px solid #c7d2fe;font-size:11px;font-weight:900;cursor:help;vertical-align:middle;}
+.wizard-field-error{border-color:#dc2626!important;box-shadow:0 0 0 2px rgba(220,38,38,.10)!important;}
+.client-faq{margin-top:16px;padding:18px;border-left:5px solid #b3131b!important;}
+.client-faq h2{margin:0 0 4px;font-size:18px;letter-spacing:-.03em;color:#111827;}
+.client-faq h3{margin:0 0 12px;color:#6f0f1c;font-size:13px;text-transform:uppercase;letter-spacing:.05em;}
+.client-faq ol{margin:0;padding-left:20px;color:#334155;font-size:12px;line-height:1.55;}
+.client-faq li{margin:6px 0;}
+
 </style>
 </head>
 <body>
@@ -1349,9 +1376,9 @@ const $=s=>document.querySelector(s);
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const toast=t=>{const el=$('#toast');el.textContent=t;el.className='toast show';setTimeout(()=>el.className='toast',3200)};
 const statusLabels={
-  pl:{draft:'Uzupełnij dane',waiting:'Oczekujące',budget:'Cena do potwierdzenia',budgetAccepted:'Cena potwierdzona',counter:'Negocjacje cenowe',searching:'Oferta w przygotowaniu',offer:'Oferta wysłana',accepted:'W realizacji',cancelled:'Odrzucono',archived:'Archiwum'},
-  en:{draft:'Complete details',waiting:'Pending',budget:'Price to confirm',budgetAccepted:'Price confirmed',counter:'Price negotiation',searching:'Offer in preparation',offer:'Offer sent',accepted:'In progress',cancelled:'Rejected',archived:'Archive'},
-  de:{draft:'Daten ergänzen',waiting:'Wartend',budget:'Preis zu bestätigen',budgetAccepted:'Preis bestätigt',counter:'Preisverhandlung',searching:'Angebot in Vorbereitung',offer:'Angebot gesendet',accepted:'In Durchführung',cancelled:'Abgelehnt',archived:'Archiv'}
+  pl:{draft:'Uzupełnij dane',waiting:'Oczekujące',budget:'Cena do potwierdzenia',budgetAccepted:'Cena potwierdzona',counter:'Negocjacje cenowe',searching:'Oferta w przygotowaniu',offer:'Oferta wysłana',accepted:'W realizacji',cancelled:'Odrzucono',archived:'Archiwum',finalized:'Zrealizowano'},
+  en:{draft:'Complete details',waiting:'Pending',budget:'Price to confirm',budgetAccepted:'Price confirmed',counter:'Price negotiation',searching:'Offer in preparation',offer:'Offer sent',accepted:'In progress',cancelled:'Rejected',archived:'Archive',finalized:'Completed'},
+  de:{draft:'Daten ergänzen',waiting:'Wartend',budget:'Preis zu bestätigen',budgetAccepted:'Preis bestätigt',counter:'Preisverhandlung',searching:'Angebot in Vorbereitung',offer:'Angebot gesendet',accepted:'In Durchführung',cancelled:'Abgelehnt',archived:'Archiv',finalized:'Abgeschlossen'}
 };
 const statusLabel=s=>((statusLabels[state.lang]||statusLabels.pl)[s]||statusLabels.pl[s]||s);
 const reqLabels={ramp:'Wysokość rampowa',gps:'GPS',adr:'ADR',gdp:'GDP',waste:'Odpady',temperature:'Temperatura kontrolowana'};
@@ -1537,7 +1564,7 @@ function localToday(){const d=new Date();const p=n=>String(n).padStart(2,'0');re
 function postalOnly(v){
   const raw=String(v||'').trim().toUpperCase();
   if(!raw)return '';
-  // Przykłady: „PL 41-407 Imielin…”, „DE14469 Potsdam…”, „NL 1234 AB…”.
+  // Przykłady: „DE40472 Düsseldorf…”, „PL80-180 Gdańsk…”, „NL 1234 AB…”.
   const match=raw.match(/\b([A-Z]{2})[\s,;:-]*((?:\d{2}-\d{3})|(?:\d{4}\s?[A-Z]{2})|(?:\d{5})|(?:\d{3}\s?\d{2})|(?:\d{4})|(?:[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}))\b/);
   if(match)return (match[1]+match[2]).replace(/\s+/g,'');
   const compact=raw.replace(/\s+/g,'');
@@ -1559,8 +1586,11 @@ function normalizeRequest(r){
   if(r.editing&&!r.submitted)r.status='draft';
   r.budgetProposalPending=Boolean(r.budgetProposalPending);
   r.clientProposal=r.clientProposal||'';r.clientProposalCurrency=r.clientProposalCurrency||r.currency;if(!r.clientEmail){const c=getClient(r.clientId);r.clientEmail=c?.email||'';}
-  const lastLoadDate=r.loads.map(dateForEnd).filter(Boolean).sort().at(-1);
-  if(lastLoadDate&&lastLoadDate<localToday()&&!['draft','accepted','cancelled','offer','budget','budgetAccepted','counter'].includes(r.status)){r.status='archived'}
+  const lastUnloadDate=r.unloads.map(dateForEnd).filter(Boolean).sort().at(-1);
+  if(lastUnloadDate&&lastUnloadDate<localToday()){
+    if(r.status==='accepted')r.status='finalized';
+    else if(!['draft','cancelled','archived','finalized'].includes(r.status))r.status='archived';
+  }
 }
 function getClient(id){return state.clients.find(c=>c.id===id)}
 function login(role){state.current=role==='admin'?state.admin:state.clients[0];state.view='loads';render()}
@@ -1589,7 +1619,7 @@ async function loginWithCode(){
   toast('Nieprawidłowy login albo kod dostępu.');
 }
 async function logout(){try{if(cloudOnline&&fbAuth)await signOut(fbAuth);}catch(e){}try{localStorage.removeItem('mkFirebaseAuthEmail')}catch(e){}authUser=null;state.current=null;render()}
-function sidebarLoadPlanner(){return `<div class="sidebar-tool is-disabled sidebar-loadplanner-placeholder sidebar-brand-loadplanner" aria-disabled="true" title="Load Planner 3D — wkrótce"><span class="sidebar-tool-icon">▧</span><div><b>Load Planner 3D</b><small>wkrótce dostępne</small></div></div>`}
+function sidebarLoadPlanner(){return `<div class="sidebar-tool sidebar-loadplanner-placeholder sidebar-brand-loadplanner" title="Load Planner 3D"><span class="sidebar-tool-icon">▧</span><div><b>Load Planner 3D</b></div></div><div class="sidebar-tool sidebar-barometer" title="Barometr"><span class="sidebar-tool-icon">◉</span><div><b>Barometr</b></div></div>`}
 function sidebarBrand(){return `<div class="sidebar-top-brand"><div class="sidebar-logo-box"><img class="sidebar-mini-logo" src="padmain-logo-cutout.png" alt="Padmain logo"></div><div class="sidebar-top-brand-copy"><strong>Padmain Freight Exchange</strong><small>M.KULCZYK</small></div></div><div class="lang-public-label sidebar-lang-top">Wersja językowa</div>${langButtons()}${sidebarLoadPlanner()}`}
 function sidebarBottom(logged=true){return `<div class="sidebar-bottom-stack"><a class="sidebar-partner-link" href="https://motohouse-tsl.com" target="_blank" rel="noopener noreferrer" aria-label="MotoHouse"><strong>${esc(ui('currentlyAt'))}</strong><img class="sidebar-partner-logo" src="https://mkulczyk.pl/motohouse-logo-2.svg" alt="MotoHouse"></a>${logged?`<button data-action="logout" class="btn dark logout">${esc(ui('logout'))}</button>`:''}</div>`}
 function layout(inner){
@@ -1609,7 +1639,7 @@ const publicCopy={
 };
 function tPublic(k){return (publicCopy[state.lang]||publicCopy.pl)[k]||publicCopy.pl[k]||k}
 const uiCopy={
-  pl:{platform:'Padmain Freight Exchange',inquiries:'Zapytania',myInquiries:'Moje zapytania',clients:'Klienci i konta',settings:'Ustawienia',profile:'Profil',operational:'Panel operacyjny',accountProfile:'Profil konta',courses:'Padmain Freight Exchange',inquiryPlatform:'Padmain Freight Exchange',logout:'Wyloguj',loadplannerSmall:'',currentlyAt:'Obecnie w:',search:'Wyszukiwanie',searchPlaceholder:'Numer, klient, adres, status…',sort:'Sortowanie:',date:'Data',regDate:'Data rejestru',no:'Nr',route:'Trasa',cargo:'Ładunek',details:'Wymagania / notatka',budget:'Budżet',price:'Cena',status:'Status',operations:'Operacje',client:'Klient',addInquiry:'Dodaj zapytanie',clientLead:'Zgłoś transport w jednym prostym formularzu. Na liście widzisz tylko najważniejsze informacje operacyjne.',clientEmpty:'Nie masz jeszcze zapytań. Kliknij „Dodaj zapytanie”, aby rozpocząć.',adminLead:'Lista do prowadzenia ofert — kraj i kod pocztowy, terminy, ładunek oraz status.',waiting:'Oczekujące',priceConfirm:'Cena do potwierdzenia',offerPrep:'Oferta w przygotowaniu',inProgress:'W realizacji',notifications:'Powiadomienia',notificationCenter:'Centrum powiadomień',noNotifications:'Brak powiadomień.',markRead:'Oznacz jako przeczytane',clear:'Wyczyść',settingsTitle:'Powiadomienia i domyślna waluta',notifyEmail:'E-mail do powiadomień administratora',browserNotify:'Powiadomienia systemowe w przeglądarce, gdy przeglądarka pozwoli',saveSettings:'Zapisz ustawienia',enableBrowser:'Włącz powiadomienia przeglądarki',testEmail:'Próba powiadomienia e-mail',systemSender:'Nadawca systemu',defaultCurrency:'Domyślna waluta budżetu'},
+  pl:{platform:'Padmain Freight Exchange',inquiries:'Zapytania',myInquiries:'Moje zapytania',clients:'Klienci i konta',settings:'Ustawienia',profile:'Profil',operational:'Panel operacyjny',accountProfile:'Profil konta',courses:'Padmain Freight Exchange',inquiryPlatform:'Padmain Freight Exchange',logout:'Wyloguj',loadplannerSmall:'',currentlyAt:'Obecnie w:',search:'Wyszukiwanie',searchPlaceholder:'Numer, klient, adres, status…',sort:'Sortowanie:',date:'Data',regDate:'Data rejestru',no:'Nr',route:'Trasa',cargo:'Ładunek',details:'Wymagania / notatka',budget:'Budżet',price:'Cena',status:'Status',operations:'Operacje',client:'Klient',addInquiry:'Dodaj zapytanie',clientLead:'Zgłoś transport w jednym prostym formularzu',clientEmpty:'Nie masz jeszcze zapytań. Kliknij „Dodaj zapytanie”, aby rozpocząć.',adminLead:'Lista do prowadzenia ofert — kraj i kod pocztowy, terminy, ładunek oraz status.',waiting:'Oczekujące',priceConfirm:'Cena do potwierdzenia',offerPrep:'Oferta w przygotowaniu',inProgress:'W realizacji',notifications:'Powiadomienia',notificationCenter:'Centrum powiadomień',noNotifications:'Brak powiadomień.',markRead:'Oznacz jako przeczytane',clear:'Wyczyść',settingsTitle:'Powiadomienia i domyślna waluta',notifyEmail:'E-mail do powiadomień administratora',browserNotify:'Powiadomienia systemowe w przeglądarce, gdy przeglądarka pozwoli',saveSettings:'Zapisz ustawienia',enableBrowser:'Włącz powiadomienia przeglądarki',testEmail:'Próba powiadomienia e-mail',systemSender:'Nadawca systemu',defaultCurrency:'Domyślna waluta budżetu'},
   en:{platform:'Padmain Freight Exchange',inquiries:'Inquiries',myInquiries:'My inquiries',clients:'Clients and accounts',settings:'Settings',profile:'Profile',operational:'Operations panel',accountProfile:'Account profile',courses:'Padmain Freight Exchange',inquiryPlatform:'Padmain Freight Exchange',logout:'Log out',loadplannerSmall:'',currentlyAt:'Currently at:',search:'Search',searchPlaceholder:'Number, client, address, status…',sort:'Sorting:',date:'Date',regDate:'Registered',no:'No.',route:'Route',cargo:'Cargo',details:'Requirements / note',budget:'Budget',price:'Price',status:'Status',operations:'Actions',client:'Client',addInquiry:'Add inquiry',clientLead:'Submit transport in one simple form. The list shows the key operational information only.',clientEmpty:'You have no inquiries yet. Click “Add inquiry” to start.',adminLead:'List for managing offers — country and postal code, dates, cargo and status.',waiting:'Pending',priceConfirm:'Price to confirm',offerPrep:'Offer in preparation',inProgress:'In progress',notifications:'Notifications',notificationCenter:'Notification center',noNotifications:'No notifications.',markRead:'Mark as read',clear:'Clear',settingsTitle:'Notifications and default currency',notifyEmail:'Admin notification e-mail',browserNotify:'Browser system notifications when allowed by the browser',saveSettings:'Save settings',enableBrowser:'Enable browser notifications',testEmail:'Test e-mail notification',systemSender:'System sender',defaultCurrency:'Default budget currency'},
   de:{platform:'Padmain Freight Exchange',inquiries:'Anfragen',myInquiries:'Meine Anfragen',clients:'Kunden und Konten',settings:'Einstellungen',profile:'Profil',operational:'Operatives Panel',accountProfile:'Kontoprofil',courses:'Padmain Freight Exchange',inquiryPlatform:'Padmain Freight Exchange',logout:'Abmelden',loadplannerSmall:'',currentlyAt:'Derzeit bei:',search:'Suche',searchPlaceholder:'Nummer, Kunde, Adresse, Status…',sort:'Sortierung:',date:'Datum',regDate:'Registriert',no:'Nr.',route:'Route',cargo:'Ladung',details:'Anforderungen / Notiz',budget:'Budget',price:'Preis',status:'Status',operations:'Aktionen',client:'Kunde',addInquiry:'Anfrage hinzufügen',clientLead:'Transport in einem einfachen Formular melden. Die Liste zeigt nur die wichtigsten operativen Informationen.',clientEmpty:'Sie haben noch keine Anfragen. Klicken Sie auf „Anfrage hinzufügen“, um zu starten.',adminLead:'Liste zur Angebotsführung — Land und Postleitzahl, Termine, Ladung und Status.',waiting:'Wartend',priceConfirm:'Preis zu bestätigen',offerPrep:'Angebot in Vorbereitung',inProgress:'In Durchführung',notifications:'Benachrichtigungen',notificationCenter:'Benachrichtigungszentrum',noNotifications:'Keine Benachrichtigungen.',markRead:'Als gelesen markieren',clear:'Löschen',settingsTitle:'Benachrichtigungen und Standardwährung',notifyEmail:'Admin-Benachrichtigungs-E-Mail',browserNotify:'Systembenachrichtigungen im Browser, wenn erlaubt',saveSettings:'Einstellungen speichern',enableBrowser:'Browser-Benachrichtigungen aktivieren',testEmail:'Test-E-Mail-Benachrichtigung',systemSender:'Systemabsender',defaultCurrency:'Standardwährung für Budget'}
 };
@@ -1659,16 +1689,36 @@ function detailSummaryHtml(r){
   const note=String(r.clientNote||'').trim();
   return `<div class="detail-summary">${requirements?`<p><b>Wymagania:</b> ${esc(requirements)}</p>`:''}${note?`<p><b>Notatka:</b> ${esc(note)}</p>`:''}${!requirements&&!note?'<span class="muted-dash">—</span>':''}</div>`;
 }
+function clientStatusTooltip(r){
+  const c=getClient(r.clientId)||{};
+  const mail=c.email||r.clientEmail||'adres e-mail klienta';
+  const tips={
+    waiting:'Spedytor wkrótce rozpatrzy zgłoszenie.',
+    searching:'Jeżeli tylko pojawią się oferty, spedytor bezzwłocznie powiadomi Cię.',
+    offer:`Spedytor wysłał ofertę, sprawdź skrzynkę pocztową: ${mail}.`,
+    accepted:'Transport jest w realizacji.',
+    finalized:'Transport został zrealizowany.',
+    archived:'Zapytanie jest w archiwum.',
+    budget:'Spedytor wysłał propozycję ceny do potwierdzenia.',
+    budgetAccepted:'Cena potwierdzona — spedytor przygotuje ofertę.',
+    counter:'Trwa negocjacja ceny.',
+    cancelled:'Zapytanie zostało odrzucone.'
+  };
+  return tips[r.status]||statusLabel(r.status);
+}
 function statusTag(r,admin=false){
   const label=statusLabel(r.status);
   return admin
     ?`<button type="button" class="status-tag ${esc(r.status)} status-trigger" data-open-status="${esc(r.id)}" aria-label="Zmień status: ${esc(label)}">${esc(label)}</button>`
-    :`<span class="status-tag ${esc(r.status)}">${esc(label)}</span>`;
+    :`<span class="status-tag ${esc(r.status)}" title="${esc(clientStatusTooltip(r))}">${esc(label)}</span>`;
+}
+function clientFaqHtml(){
+  return `<section class="card client-faq"><h2>FAQ</h2><h3>Jak to działa?</h3><ol><li>Zgłoś ładunek zgodnie z prawdziwymi danymi i podaj budżet.</li><li>Spedytor rozpatrzy zapytanie i ewentualnie podpowie, ile może kosztować transport. To nie jest jeszcze umowa transportu.</li><li>Po zatwierdzeniu stawki dla obu stron oferta zostaje przesłana do bazy ponad 9500 przewoźników z całej Europy.</li><li>Powiadomienie o znalezieniu auta dostaniesz na pocztę. Jeżeli nie odpowiesz w ciągu 20–30 minut, spedytor spróbuje skontaktować się z Tobą telefonicznie.</li><li>Pamiętaj o anulowaniu zgłoszenia, jeżeli nie potrzebujesz już transportu — to ułatwi moją pracę.</li></ol></section>`;
 }
 function renderClient(){
   const c=state.current;const mine=state.requests.filter(r=>r.clientId===c.id);const ordered=sortedRequests(mine,'client');
   const rows=ordered.length?ordered.map(clientRow).join(''):`<tr><td colspan="8"><div class="empty">${esc(ui('clientEmpty'))}</div></td></tr>`;
-  return layout(`<div class="head"><div><h1>${esc(ui('myInquiries'))}</h1><p>${esc(ui('clientLead'))}</p></div><button class="btn red add-load" data-action="add-request">+ ${esc(ui('addInquiry'))}</button></div><section class="card table-card modern-table">${tableToolbar('client')}<div class="table-wrap"><table class="tbl compact-list"><colgroup><col class="col-reg"><col class="col-code"><col class="col-route"><col class="col-cargo"><col class="col-details"><col class="col-money"><col class="col-status"><col class="col-actions"></colgroup><thead><tr><th>${sortHead(ui('regDate'),'createdAt','client')}</th><th>${sortHead(ui('no'),'code','client')}</th><th>${sortHead(ui('route'),'route','client')}</th><th>${sortHead(ui('cargo'),'cargo','client')}</th><th>${sortHead(ui('details'),'details','client')}</th><th>${sortHead(ui('budget'),'budget','client')}</th><th>${sortHead(ui('status'),'status','client')}</th><th>${esc(ui('operations'))}</th></tr></thead><tbody>${rows}</tbody></table></div></section>`);
+  return layout(`<div class="head"><div><h1>${esc(ui('myInquiries'))}</h1><p>${esc(ui('clientLead'))}</p></div><button class="btn red add-load" data-action="add-request">+ ${esc(ui('addInquiry'))}</button></div><section class="card table-card modern-table">${tableToolbar('client')}<div class="table-wrap"><table class="tbl compact-list"><colgroup><col class="col-reg"><col class="col-code"><col class="col-route"><col class="col-cargo"><col class="col-details"><col class="col-money"><col class="col-status"><col class="col-actions"></colgroup><thead><tr><th>${sortHead(ui('regDate'),'createdAt','client')}</th><th>${sortHead(ui('no'),'code','client')}</th><th>${sortHead(ui('route'),'route','client')}</th><th>${sortHead(ui('cargo'),'cargo','client')}</th><th>${sortHead(ui('details'),'details','client')}</th><th>${sortHead(ui('budget'),'budget','client')}</th><th>${sortHead(ui('status'),'status','client')}</th><th>${esc(ui('operations'))}</th></tr></thead><tbody>${rows}</tbody></table></div></section>${clientFaqHtml()}`);
 }
 function clientRow(r){
   normalizeRequest(r);
@@ -1681,8 +1731,9 @@ function clientRow(r){
   else if(r.status==='counter') actions=`<span class="counter-note">Negocjacje cenowe</span>${remove}`;
   else if(r.status==='budgetAccepted') actions=`<span class="counter-note">Cena potwierdzona — czekamy na spedytora</span>${remove}`;
   else if(r.status==='searching') actions=`<span class="counter-note">Oferta jest przygotowywana</span>${remove}`;
-  else if(r.status==='offer') actions=`<span class="counter-note">Oferta wysłana — czekamy na potwierdzenie spedytora</span>${remove}`;
+  else if(r.status==='offer') actions=`${remove}`;
   else if(r.status==='accepted') actions=`<span class="counter-note">Transport w realizacji</span>${remove}`;
+  else if(r.status==='finalized') actions=`<span class="counter-note">Zrealizowano</span>${remove}`;
   else actions=`<button class="btn small" data-edit="${esc(r.id)}">Edytuj</button>${remove}`;
   const budget=r.budget?`${r.budget} ${r.currency||state.currency}`:'—';
   const main=`<tr class="request-row row-${esc(r.status)}" data-table-role="client" data-request-id="${esc(r.id)}" data-search="${esc(requestSearchText(r,c))}">${registeredCell(r)}<td class="code">${esc(r.code)}</td><td class="route-main">${routeFlowHtml(r)}</td><td class="cargo-cell">${cargoSummaryHtml(r)}</td><td class="details-cell">${detailSummaryHtml(r)}</td><td class="money-cell ${pending?'budget-pending':''}"><b>${esc(budget)}</b></td><td class="status-cell">${statusTag(r)}</td><td class="action-cell"><div class="actions">${actions}</div></td></tr>`;
@@ -1905,7 +1956,7 @@ setInterval(refreshAdminBoard,45000);
 
 function requestBrowserNotifications(){if(!('Notification' in window)){toast('Ta przeglądarka nie obsługuje powiadomień systemowych.');return}Notification.requestPermission().then(p=>{state.notifyBrowser=p==='granted';store();render();toast(state.notifyBrowser?'Powiadomienia systemowe włączone.':'Powiadomienia systemowe nie zostały włączone.');})}
 function demoNotifyAdmin(r,kind='Nowe zapytanie'){const to=(state.notifyEmail||'').trim();if(!to){toast('W ustawieniach wpisz e-mail do powiadomień administratora.');return}const c=getClient(r.clientId)||{};const subject=`${kind}: ${r.code||''}`;const body=`${kind}\n\nNumer: ${r.code||''}\nKlient: ${c.company||''}\nZaładunek: ${routeSummary(r.loads||[])}\nRozładunek: ${routeSummary(r.unloads||[])}\nWymagania: ${requirementsText(r)||'brak'}\nNotatka klienta: ${r.clientNote||'brak'}\nBudżet: ${r.budget||'brak'} ${r.currency||state.currency}`;window.location.href=`mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;toast('Otworzono próbne powiadomienie. Wyślij je z programu pocztowego.')} 
-function updateRequest(id){draftFromRow(id);const r=state.requests.find(x=>x.id===id);if(!r)return;const missing=[];if(!r.loads.length)missing.push('załadunek');if(!r.unloads.length)missing.push('rozładunek');if(!String(r.ldm||'').trim())missing.push('LDM');if(String(r.weight||'').trim()==='')missing.push('waga');if(!r.access)missing.push('dostęp');if(missing.length){toast(`Uzupełnij pola wymagane: ${missing.join(', ')}.`);return}const dateError=validateRouteDates(r);if(dateError){toast(dateError);return}r.editing=false;r.submitted=true;r.status='waiting';normalizeRequest(r);addNotification('Nowe zgłoszenie klienta',r,'Klient wysłał nowe zapytanie.');store();render();demoNotifyAdmin(r,'Nowe zapytanie')} 
+function updateRequest(id){draftFromRow(id);const r=state.requests.find(x=>x.id===id);if(!r)return;const missing=[];if(!r.loads.length)missing.push('załadunek');if(!r.unloads.length)missing.push('rozładunek');if(!String(r.ldm||'').trim()&&!String(r.notes||'').trim())missing.push('LDM albo lista ładunkowa');if(String(r.weight||'').trim()==='')missing.push('waga');if(!r.access)missing.push('dostęp');if(missing.length){toast(`Uzupełnij pola wymagane: ${missing.join(', ')}.`);return}const dateError=validateRouteDates(r);if(dateError){toast(dateError);return}r.editing=false;r.submitted=true;r.status='waiting';normalizeRequest(r);addNotification('Nowe zgłoszenie klienta',r,'Klient wysłał nowe zapytanie.');store();render();demoNotifyAdmin(r,'Nowe zapytanie')} 
 function clientNeedsDeleteReason(r){return state.current?.role==='client'&&['searching','offer','accepted'].includes(r.status)}
 function openDeleteModal(id){
   const r=state.requests.find(x=>x.id===id);if(!r)return;
@@ -1955,9 +2006,9 @@ function wizardPointTitle(kind,index){
 }
 function wizardPointCard(kind,p,index,canRemove=false){
   const parts=postalParts(p||{});
-  const examples={loads:{country:'PL',postal:'41-407'},stops:{country:'PL',postal:'61-569'},unloads:{country:'PL',postal:'80-180'}}[kind];
+  const examples={loads:{country:'DE',postal:'DE40472'},stops:{country:'DE',postal:'DE10115'},unloads:{country:'PL',postal:'PL80-180'}}[kind];
   const today=localToday();
-  return `<article class="wizard-point-card" data-point-kind="${kind}" data-point-index="${index}"><div class="wizard-point-card-head"><div class="wizard-point-ident"><span class="wizard-point-no">${index+1}</span><span>${esc(wizardPointTitle(kind,index))}</span></div>${canRemove?`<button type="button" class="btn danger small remove-point" data-wizard-remove-point="${kind}">Usuń</button>`:''}</div><div class="wizard-location-grid"><label class="country-field">Kraj <b class="required-mark">*</b><input data-point-field="country" data-country-input autocomplete="off" placeholder="PL" value="${esc(parts.country||examples.country)}">${countryMenuMarkup()}</label><label>Kod pocztowy <b class="required-mark">*</b><input data-point-field="postal" inputmode="text" maxlength="12" autocomplete="postal-code" placeholder="np. ${examples.postal}" value="${esc(parts.postal)}"></label></div><div class="wizard-range-block"><span>Zakres dat <b class="required-mark">*</b></span><div><label>Data od<input data-point-field="dateStart" type="date" min="${today}" value="${esc((p&&p.dateStart)||'')}"></label><label>Data do<input data-point-field="dateEnd" type="date" min="${today}" value="${esc((p&&p.dateEnd)||'')}"></label></div></div><div class="wizard-range-block"><span>Zakres godzin</span><div><label>Godzina od<input data-point-field="timeStart" type="time" value="${esc((p&&p.timeStart)||'')}"></label><label>Godzina do<input data-point-field="timeEnd" type="time" value="${esc((p&&p.timeEnd)||'')}"></label></div></div></article>`;
+  return `<article class="wizard-point-card" data-point-kind="${kind}" data-point-index="${index}"><div class="wizard-point-card-head"><div class="wizard-point-ident"><span class="wizard-point-no">${index+1}</span><span>${esc(wizardPointTitle(kind,index))}</span></div>${canRemove?`<button type="button" class="btn danger small remove-point" data-wizard-remove-point="${kind}">Usuń</button>`:''}</div><div class="wizard-location-grid"><label class="country-field">Kraj <b class="required-mark">*</b><input data-point-field="country" data-country-input autocomplete="off" placeholder="DE" value="${esc(parts.country||examples.country)}">${countryMenuMarkup()}</label><label>Kod pocztowy <b class="required-mark">*</b><input data-point-field="postal" inputmode="text" maxlength="12" autocomplete="postal-code" placeholder="np. ${examples.postal}" value="${esc(parts.postal)}"></label></div><div class="wizard-range-block no-title"><div><label>Data od<input data-point-field="dateStart" type="date" min="${today}" value="${esc((p&&p.dateStart)||'')}"></label><label>Data do<input data-point-field="dateEnd" type="date" min="${today}" value="${esc((p&&p.dateEnd)||'')}"></label></div></div><div class="wizard-range-block no-title"><div><label>Godzina od<input data-point-field="timeStart" type="time" value="${esc((p&&p.timeStart)||'')}"></label><label>Godzina do<input data-point-field="timeEnd" type="time" value="${esc((p&&p.timeEnd)||'')}"></label></div></div></article>`;
 }
 function wizardRouteSection(kind,points){
   const info={
@@ -1979,7 +2030,8 @@ function wizardPointsFromDom(kind){
   return [...document.querySelectorAll(`#requestWizard .wizard-point-card[data-point-kind="${kind}"]`)].map(card=>{
     const field=name=>String(card.querySelector(`[data-point-field="${name}"]`)?.value||'').trim();
     const country=normalizeCountryCode(field('country'));
-    const postal=field('postal').toUpperCase().replace(/\s+/g,'');
+    const postalRaw=field('postal').toUpperCase().replace(/\s+/g,'');
+    const postal=country&&postalRaw.startsWith(country)?postalRaw.slice(country.length):postalRaw;
     return {address:field('address'),postalCity:`${country}${postal}`,country,postal,dateStart:field('dateStart'),timeStart:field('timeStart'),dateEnd:field('dateEnd'),timeEnd:field('timeEnd'),type:kind==='stops'?'Punkt pośredni':'',__card:card};
   });
 }
@@ -2031,7 +2083,11 @@ function validateWizardStep(step){
   }
   if(step===2){
     const missing=[];
-    [['wizLdm','LDM'],['wizWeight','wagę']].forEach(([id,label])=>{const el=$('#'+id);if(!String(el?.value||'').trim()){el?.classList.add('wizard-field-error');missing.push(label)}});
+    const ldmEl=$('#wizLdm'), notesEl=$('#wizNotes'), weightEl=$('#wizWeight');
+    const hasLdm=Boolean(String(ldmEl?.value||'').trim());
+    const hasNotes=Boolean(String(notesEl?.value||'').trim());
+    if(!hasLdm&&!hasNotes){ldmEl?.classList.add('wizard-field-error');notesEl?.classList.add('wizard-field-error');missing.push('LDM albo listę ładunkową')}
+    if(!String(weightEl?.value||'').trim()){weightEl?.classList.add('wizard-field-error');missing.push('wagę')}
     const accessGroup=$('#wizAccessGroup');if(!accessGroup?.querySelector('input:checked')){accessGroup?.classList.add('wizard-field-error');missing.push('stronę ładowania')}
     if(missing.length){toast(`Uzupełnij pola wymagane: ${missing.join(', ')}.`);return false}
   }
@@ -2066,7 +2122,7 @@ function openRequestWizard(id){
   const loads=(r.loads&&r.loads.length)?r.loads:[{}];const stops=r.stops||[];const unloads=(r.unloads&&r.unloads.length)?r.unloads:[{}];
   document.querySelector('.modal')?.remove();
   const currs=['PLN','EUR','GBP'];
-  const html=`<div class="modal request-modal" id="requestWizard" data-id="${esc(id)}" data-step="1">${countryOptionsMarkup()}<section class="modal-card wizard-card"><button class="modal-close" aria-label="Zamknij" data-wizard-cancel="${esc(id)}">×</button><div class="wizard-title"><div><span class="wizard-kicker">NOWE ZAPYTANIE</span><h2>${esc(r.code)}</h2><p>Wprowadź trasę krok po kroku. </p></div><div class="wizard-progress"><span data-progress="1"><small>Trasa</small></span><i></i><span data-progress="2"><small>Ładunek</small></span><i></i><span data-progress="3"><small>Budżet</small></span></div></div><div class="wizard-step active" data-step="1"><div class="wizard-intro"><h3>Trasa i okna czasowe</h3><p>Podaj kraj, kod pocztowy oraz zakres dat i godzin. Nowe zapytanie może dotyczyć wyłącznie dzisiejszych lub przyszłych terminów.</p></div><div class="wizard-route-error" id="wizardRouteError" role="alert" aria-live="polite"></div><div class="wizard-route-stack">${wizardRouteMarkup(loads,stops,unloads)}</div></div><div class="wizard-step" data-step="2"><div class="wizard-intro"><h3>Ładunek i wymagania</h3></div><div class="wizard-grid three"><label>LDM [m] *<input id="wizLdm" inputmode="decimal" placeholder="np. 2,4" value="${esc(ldmDisplay(r.ldm))}"></label><label>Waga (t) *<input id="wizWeight" inputmode="decimal" placeholder="np. 1,2" value="${esc(r.weight||'')}"></label>${wizardAccessMarkup(r.access)}</div><label class="wizard-label">Lista ładunkowa / opis <textarea id="wizNotes" rows="4" maxlength="500" placeholder="Np. 4 palety EUR, towar neutralny">${esc(r.notes||'')}</textarea></label><h4 class="wizard-section-label">Wymagania dodatkowe <span>opcjonalnie</span></h4><div class="wizard-check-grid">${wizardCheckboxes(r)}</div><div id="wizTempRange" class="wizard-grid two ${((r.requirements||[]).includes('temperature'))?'':'hidden'}"><label>Temperatura od<input id="wizTempMin" type="number" step="0.1" value="${esc(r.tempMin||'')}"></label><label>Temperatura do<input id="wizTempMax" type="number" step="0.1" value="${esc(r.tempMax||'')}"></label></div></div><div class="wizard-step" data-step="3"><div class="wizard-intro"><h3>Budżet i informacja dla spedytora</h3><p>Budżet jest opcjonalny. Brak budżetu nie blokuje wysłania zapytania.</p></div><div class="wizard-grid two"><label>Budżet <span>opcjonalnie</span><input id="wizBudget" inputmode="decimal" placeholder="np. 1800" value="${esc(r.budget||'')}"></label><label>Waluta<select id="wizCurrency">${currs.map(x=>`<option ${(r.currency||state.currency)===x?'selected':''}>${x}</option>`).join('')}</select></label></div><label class="wizard-label">Notatka dla spedytora <span>opcjonalnie</span><textarea id="wizClientNote" rows="5" maxlength="500" placeholder="Informacje dodatkowe dotyczące zapytania.">${esc(r.clientNote||'')}</textarea></label><div class="wizard-ready"><b>Gotowe do wysłania</b><span>Po zapisie zapytanie otrzyma status „Oczekujące” i pojawi się w panelu spedytora.</span></div></div><div class="wizard-footer"><button class="btn" data-wizard-cancel="${esc(id)}">Anuluj</button><div><button class="btn" data-wizard-prev>Wstecz</button><button class="btn red" data-wizard-next>Dalej</button><button class="btn red hidden" data-wizard-save="${esc(id)}">Zapisz zapytanie</button></div></div></section></div>`;
+  const html=`<div class="modal request-modal" id="requestWizard" data-id="${esc(id)}" data-step="1">${countryOptionsMarkup()}<section class="modal-card wizard-card"><button class="modal-close" aria-label="Zamknij" data-wizard-cancel="${esc(id)}">×</button><div class="wizard-title"><div><span class="wizard-kicker">NOWE ZAPYTANIE</span><h2>${esc(r.code)}</h2><p>Wprowadź trasę krok po kroku. </p></div><div class="wizard-progress"><span data-progress="1"><small>Trasa</small></span><i></i><span data-progress="2"><small>Ładunek</small></span><i></i><span data-progress="3"><small>Budżet</small></span></div></div><div class="wizard-step active" data-step="1"><div class="wizard-intro"><h3>Trasa i okna czasowe</h3><p>Podaj kraj, kod pocztowy, daty i godziny. Nowe zapytanie może dotyczyć wyłącznie dzisiejszych lub przyszłych terminów.</p></div><div class="wizard-route-error" id="wizardRouteError" role="alert" aria-live="polite"></div><div class="wizard-route-stack">${wizardRouteMarkup(loads,stops,unloads)}</div></div><div class="wizard-step" data-step="2"><div class="wizard-intro"><h3>Ładunek i wymagania</h3></div><div class="wizard-grid three"><label>LDM [m] <span class="help-tip" title="Jeżeli nie znasz LDM ładunku, wpisz przynajmniej pozycje na listę ładunkową zgodnie z realnymi wymiarami.">?</span><input id="wizLdm" inputmode="decimal" placeholder="np. 2,4" value="${esc(ldmDisplay(r.ldm))}"></label><label>Waga (t) *<input id="wizWeight" inputmode="decimal" placeholder="np. 1,2" value="${esc(r.weight||'')}"></label>${wizardAccessMarkup(r.access)}</div><label class="wizard-label">Lista ładunkowa / opis <textarea id="wizNotes" rows="4" maxlength="500" placeholder="Np. 4 palety EUR, towar neutralny">${esc(r.notes||'')}</textarea></label><h4 class="wizard-section-label">Wymagania dodatkowe <span>opcjonalnie</span></h4><div class="wizard-check-grid">${wizardCheckboxes(r)}</div><div id="wizTempRange" class="wizard-grid two ${((r.requirements||[]).includes('temperature'))?'':'hidden'}"><label>Temperatura od<input id="wizTempMin" type="number" step="0.1" value="${esc(r.tempMin||'')}"></label><label>Temperatura do<input id="wizTempMax" type="number" step="0.1" value="${esc(r.tempMax||'')}"></label></div></div><div class="wizard-step" data-step="3"><div class="wizard-intro"><h3>Budżet i informacja dla spedytora</h3><p>Budżet jest opcjonalny. Brak budżetu nie blokuje wysłania zapytania.</p></div><div class="wizard-grid two"><label>Budżet <span class="help-tip" title="Budżet jest opcjonalny. Brak budżetu nie blokuje wysłania zapytania.">?</span><input id="wizBudget" inputmode="decimal" placeholder="np. 1800" value="${esc(r.budget||'')}"></label><label>Waluta<select id="wizCurrency">${currs.map(x=>`<option ${(r.currency||state.currency)===x?'selected':''}>${x}</option>`).join('')}</select></label></div><label class="wizard-label">Notatka dla spedytora <span>opcjonalnie</span><textarea id="wizClientNote" rows="5" maxlength="500" placeholder="Informacje dodatkowe dotyczące zapytania.">${esc(r.clientNote||'')}</textarea></label><div class="wizard-ready"><b>Gotowe do wysłania</b><span>Po zapisie zapytanie otrzyma status „Oczekujące” i pojawi się w panelu spedytora.</span></div></div><div class="wizard-footer"><button class="btn" data-wizard-cancel="${esc(id)}">Anuluj</button><div><button class="btn" data-wizard-prev>Wstecz</button><button class="btn red" data-wizard-next>Dalej</button><button class="btn red hidden" data-wizard-save="${esc(id)}">Zapisz zapytanie</button></div></div></section></div>`;
   document.body.insertAdjacentHTML('beforeend',html);setWizardStep(1);
 }
 function closeRequestWizard(id){const r=state.requests.find(x=>x.id===id);if(r?.isNewDraft&&!r.submitted)state.requests=state.requests.filter(x=>x.id!==id);store();$('#requestWizard')?.remove();render();}
@@ -2087,13 +2143,13 @@ function openRouteModal(id,kind){
   const stopType=kind==='stops'?`<label class="point-type">Rodzaj<select id="routeType"><option value=""></option>${['Waga','Odprawa celna','Kontrola','Inne'].map(x=>`<option>${x}</option>`).join('')}</select></label>`:'';
   const addedStatus=addedIndex>=0?`<div class="point-added-status"><span class="tick">✓</span>Dodano punkt: ${esc(onePointSummary(points[addedIndex]))}</div>`:'';
   document.querySelector('.modal')?.remove();
-  document.body.insertAdjacentHTML('beforeend',`<div class="modal" id="routeModal"><section class="modal-card"><button class="modal-close" aria-label="Zamknij" data-close-modal>×</button><h2>${kindLabel}</h2><div class="point-form">${stopType}<div class="postal-row"><label>Kod pocztowy<input id="routePostalCity" maxlength="16" autocomplete="postal-code" placeholder="DE14469"></label></div><div class="date-row"><label>Data od<input id="routeDateStart" type="date"></label><label>Godzina od<input id="routeTimeStart" type="time"></label><label>Data do<input id="routeDateEnd" type="date"></label><label>Godzina do<input id="routeTimeEnd" type="time"></label></div></div><div class="modal-actions"><button class="btn red" data-add-route-point="${esc(id)}" data-route-kind="${kind}">Dodaj punkt</button></div>${addedStatus}<div class="point-list">${pointRows}</div></section></div>`)
+  document.body.insertAdjacentHTML('beforeend',`<div class="modal" id="routeModal"><section class="modal-card"><button class="modal-close" aria-label="Zamknij" data-close-modal>×</button><h2>${kindLabel}</h2><div class="point-form">${stopType}<div class="postal-row"><label>Kod pocztowy<input id="routePostalCity" maxlength="16" autocomplete="postal-code" placeholder="DE40472"></label></div><div class="date-row"><label>Data od<input id="routeDateStart" type="date"></label><label>Godzina od<input id="routeTimeStart" type="time"></label><label>Data do<input id="routeDateEnd" type="date"></label><label>Godzina do<input id="routeTimeEnd" type="time"></label></div></div><div class="modal-actions"><button class="btn red" data-add-route-point="${esc(id)}" data-route-kind="${kind}">Dodaj punkt</button></div>${addedStatus}<div class="point-list">${pointRows}</div></section></div>`)
 }
 function addRoutePoint(id,kind){
   const r=state.requests.find(x=>x.id===id);if(!r)return;
   const code=postalOnly($('#routePostalCity').value);
   const p={address:'',postalCity:code,dateStart:$('#routeDateStart').value,timeStart:$('#routeTimeStart').value,dateEnd:$('#routeDateEnd').value,timeEnd:$('#routeTimeEnd').value,type:kind==='stops'?$('#routeType').value:''};
-  if(!validPostalCode(code)){toast('Wpisz kod w formacie DE14469 lub PL41-407. Kod kraju musi być wielkimi literami.');return}
+  if(!validPostalCode(code)){toast('Wpisz kod w formacie DE40472 lub PL80-180. Kod kraju musi być wielkimi literami.');return}
   if(!p.dateStart){toast('Wpisz datę „od”.');return}
   const futureError=validatePointNotPast(p);if(futureError){toast(futureError);return}
   const dateError=validatePointDateRange(p,kind);if(dateError){toast(dateError);return}
@@ -2215,7 +2271,7 @@ function sendOfferMail(id,lang='pl'){
 }
 function openStatusModal(id){
   const r=state.requests.find(x=>x.id===id);if(!r)return;
-  const allowed=['waiting','budget','budgetAccepted','searching','offer','accepted','cancelled','archived'];
+  const allowed=['waiting','budget','budgetAccepted','searching','offer','accepted','finalized','cancelled','archived'];
   document.querySelector('.modal')?.remove();
   document.body.insertAdjacentHTML('beforeend',`<div class="modal" id="statusModal"><section class="modal-card status-modal-card"><button class="modal-close" aria-label="Zamknij" data-close-modal>×</button><h2>Zmień status</h2><p>${esc(r.code||'')}</p><label>Status<select id="adminStatusChoice">${allowed.map(s=>`<option value="${s}" ${r.status===s?'selected':''}>${statusLabel(s)}</option>`).join('')}</select></label><div class="modal-actions"><button class="btn red" data-save-status="${esc(id)}">Zapisz status</button></div></section></div>`);
 }
@@ -2250,7 +2306,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)r
 document.addEventListener('change',e=>{if(e.target.matches('[data-wizard-temp]'))$('#wizTempRange')?.classList.toggle('hidden',!e.target.checked)});
 function updateFieldColour(el){if(!el.matches('[name="ldm"],[name="weight"],[name="access"]'))return;const empty=String(el.value||'').trim()==='';el.classList.toggle('missing-strong',empty)}
 document.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;if(t.dataset.proposeBudget){proposeBudget(t.dataset.proposeBudget);return}if(t.dataset.confirmBudget){confirmBudget(t.dataset.confirmBudget);return}if(t.dataset.declineApprovedBudget){declineBudgetProposal(t.dataset.declineApprovedBudget);return}});
-document.addEventListener('input',e=>{if(e.target.matches('[data-table-search]')){const role=e.target.dataset.tableSearch;tableUi[role].query=e.target.value;applyTableSearch(role,e.target.value);return}if(e.target.matches('[data-account-search]')){const pos=e.target.selectionStart||0;tableUi.accounts.query=e.target.value;render();setTimeout(()=>{const el=document.querySelector('[data-account-search]');if(el){el.focus();try{el.setSelectionRange(pos,pos)}catch(e){}}},0);return}if(e.target.matches('[data-country-input]')){const raw=e.target.value.toUpperCase();if(e.target.value!==raw)e.target.value=raw;openCountryMenu(e.target);return}if(e.target.id==='routePostalCity'){const raw=e.target.value;const upper=raw.toUpperCase();if(raw!==upper)e.target.value=upper;}if(e.target.matches('[data-point-field="postal"]')){const raw=e.target.value;const upper=raw.toUpperCase();if(raw!==upper)e.target.value=upper;}if(e.target.matches('#wizAccessGroup input')){$('#wizAccessGroup')?.classList.remove('wizard-field-error')}if(e.target.closest('#requestWizard')&&e.target.matches('[data-point-field],#wizLdm,#wizWeight,#wizAccessGroup input')){e.target.classList.remove('wizard-field-error');const card=e.target.closest('.wizard-point-card');if(card&&!card.querySelector('.wizard-field-error'))card.classList.remove('wizard-card-error');}updateFieldColour(e.target)});
+document.addEventListener('input',e=>{if(e.target.matches('[data-table-search]')){const role=e.target.dataset.tableSearch;tableUi[role].query=e.target.value;applyTableSearch(role,e.target.value);return}if(e.target.matches('[data-account-search]')){const pos=e.target.selectionStart||0;tableUi.accounts.query=e.target.value;render();setTimeout(()=>{const el=document.querySelector('[data-account-search]');if(el){el.focus();try{el.setSelectionRange(pos,pos)}catch(e){}}},0);return}if(e.target.matches('[data-country-input]')){const raw=e.target.value.toUpperCase();if(e.target.value!==raw)e.target.value=raw;openCountryMenu(e.target);return}if(e.target.id==='routePostalCity'){const raw=e.target.value;const upper=raw.toUpperCase();if(raw!==upper)e.target.value=upper;}if(e.target.matches('[data-point-field="postal"]')){const raw=e.target.value;const upper=raw.toUpperCase();if(raw!==upper)e.target.value=upper;}if(e.target.matches('#wizAccessGroup input')){$('#wizAccessGroup')?.classList.remove('wizard-field-error')}if(e.target.closest('#requestWizard')&&e.target.matches('[data-point-field],#wizLdm,#wizNotes,#wizWeight,#wizAccessGroup input')){e.target.classList.remove('wizard-field-error');const card=e.target.closest('.wizard-point-card');if(card&&!card.querySelector('.wizard-field-error'))card.classList.remove('wizard-card-error');}updateFieldColour(e.target)});
 document.addEventListener('focusin',e=>{if(e.target.matches('[data-country-input]'))openCountryMenu(e.target);},true);
 document.addEventListener('change',e=>{if(e.target.matches('[data-point-field="country"]')){const code=normalizeCountryCode(e.target.value);if(code)e.target.value=code;}if(e.target.matches('[data-temp-toggle]')){$('#tempRange')?.classList.toggle('hidden',!e.target.checked)}if(e.target.dataset.adminStatus){setAdminStatus(e.target.dataset.adminStatus,e.target.value);return}updateFieldColour(e.target)});document.addEventListener('focusin',e=>{if(e.target.id==='wizLdm')e.target.value=normalizedLdm(e.target.value);},true);document.addEventListener('focusout',e=>{if(e.target.matches('[data-point-field="country"]')){const code=normalizeCountryCode(e.target.value);if(code)e.target.value=code;}if(e.target.id==='wizLdm')e.target.value=ldmDisplay(e.target.value);},true);
 document.addEventListener('submit',e=>{if(e.target.id==='accessLoginForm'){e.preventDefault();loginWithCode();return}if(e.target.id==='settingsForm'){e.preventDefault();state.notifyEmail=$('#notifyEmail').value.trim();state.currency=$('#defaultCurrency').value||'PLN';state.notifyBrowser=Boolean($('#notifyBrowser')?.checked);store();render();toast('Ustawienia zapisane.')}});
