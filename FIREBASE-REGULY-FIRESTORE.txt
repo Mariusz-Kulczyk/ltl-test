@@ -9,6 +9,9 @@ service cloud.firestore {
     function isAdmin() {
       return signedIn() && request.auth.token.email == "contact@mkulczyk.pl";
     }
+    function isOwnerEmail(email) {
+      return signedIn() && email == request.auth.token.email;
+    }
 
     match /admin/{docId} {
       allow read, write: if isAdmin();
@@ -19,35 +22,30 @@ service cloud.firestore {
     }
 
     match /clients/{clientId} {
-      allow read: if isAdmin() || (signedIn() && resource.data.email == request.auth.token.email);
-      allow create: if isAdmin() || (signedIn() && request.resource.data.email == request.auth.token.email);
+      allow read: if isAdmin() || isOwnerEmail(resource.data.email);
+      allow create: if isAdmin();
       allow update: if isAdmin() || (
-        signedIn() &&
-        resource.data.email == request.auth.token.email &&
+        isOwnerEmail(resource.data.email) &&
         request.resource.data.email == resource.data.email
       );
       allow delete: if isAdmin();
     }
 
     match /requests/{requestId} {
-      allow read: if isAdmin() || (signedIn() && resource.data.clientEmail == request.auth.token.email);
-      allow create: if isAdmin() || (signedIn() && request.resource.data.clientEmail == request.auth.token.email);
+      allow read: if isAdmin() || isOwnerEmail(resource.data.clientEmail);
+      allow create: if isAdmin() || isOwnerEmail(request.resource.data.clientEmail);
       allow update: if isAdmin() || (
-        signedIn() &&
-        resource.data.clientEmail == request.auth.token.email &&
+        isOwnerEmail(resource.data.clientEmail) &&
         request.resource.data.clientEmail == resource.data.clientEmail
       );
       allow delete: if isAdmin();
     }
 
     match /notifications/{notificationId} {
-      allow read, delete: if isAdmin();
-      allow create: if isAdmin() || (signedIn() && request.resource.data.clientEmail == request.auth.token.email);
-      allow update: if isAdmin() || (
-        signedIn() &&
-        resource.data.clientEmail == request.auth.token.email &&
-        request.resource.data.clientEmail == resource.data.clientEmail
-      );
+      allow read, update, delete: if isAdmin();
+      allow create: if signedIn()
+        && request.resource.data.clientEmail == request.auth.token.email
+        && request.resource.data.targetEmail == "contact@mkulczyk.pl";
     }
   }
 }
